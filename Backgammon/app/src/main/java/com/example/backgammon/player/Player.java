@@ -2,6 +2,7 @@ package com.example.backgammon.player;
 
 
 import com.example.backgammon.gameLogic.CalculationState;
+import com.example.backgammon.gameLogic.GameLogic;
 
 import java.io.Serializable;
 
@@ -23,11 +24,9 @@ public abstract class Player implements Serializable{
         return checkers;
     }
 
-    public void setCheckers(int checkers) {
-        this.checkers = checkers;
-    }
+   public abstract void play(GameLogic gameLogic);
 
-   public abstract void play();
+    public abstract void rollDices(GameLogic gameLogic);
 
     public int getState() {
         return state;

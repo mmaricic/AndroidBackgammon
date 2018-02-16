@@ -12,7 +12,7 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/player1Name"
+            android:id="@+id/player2Name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -24,10 +24,10 @@
             android:textStyle="bold" />
 
         <ImageView
-            android:id="@+id/player1Checker"
+            android:id="@+id/player2Checker"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_below="@id/player1Name"
+            android:layout_below="@id/player2Name"
             android:layout_centerInParent="true"
             android:layout_marginTop="5dp" />
 
@@ -46,10 +46,10 @@
             android:onClick="roll"/>
 
         <TextView
-            android:id="@+id/player2Name"
+            android:id="@+id/player1Name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@id/player2Checker"
+            android:layout_above="@id/player1Checker"
             android:layout_centerInParent="true"
             android:layout_marginBottom="5dp"
             android:fontFamily="serif"
@@ -58,7 +58,7 @@
             android:textStyle="bold" />
 
         <ImageView
-            android:id="@+id/player2Checker"
+            android:id="@+id/player1Checker"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentBottom="true"

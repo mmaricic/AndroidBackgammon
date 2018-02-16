@@ -11,5 +11,5 @@ public interface CalculationState {
     public static final int BlotState = 1;
     public static final int BearingOffState = 2;
 
-    public void caluclateMoves(GameData gameData);
+    public void calculateMoves(GameData gameData);
 }

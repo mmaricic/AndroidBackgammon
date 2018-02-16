@@ -55,16 +55,18 @@ public class SelectGameActivity extends AppCompatActivity {
     }
 
     public void startGame(View view) {
-        boolean multiplayer = true;
+        int compNum = -1;
         String player1 = ((EditText) findViewById(R.id.player1)).getText().toString();
         String player2 = ((EditText) findViewById(R.id.player2)).getText().toString();
         if (player1 == null || player1.isEmpty() || player2 == null || player2.isEmpty())
             ((TextView) findViewById(R.id.error)).setText("Players names are required!");
         else {
-            if (oldSelectedPlayer2 == R.id.computer2 || oldSelectedPlayer1 == R.id.computer1)
-                multiplayer = false;
+            if (oldSelectedPlayer2 == R.id.computer2)
+                compNum = 1;
+            else if(oldSelectedPlayer1 == R.id.computer1)
+                compNum = 0;
             Intent intent = new Intent(this, GameActivity.class);
-            intent.putExtra("MULTIPLAYER", multiplayer);
+            intent.putExtra("COMP_NUM", compNum);
             intent.putExtra("PLAYER1", player1);
             intent.putExtra("PLAYER2", player2);
             startActivity(intent);

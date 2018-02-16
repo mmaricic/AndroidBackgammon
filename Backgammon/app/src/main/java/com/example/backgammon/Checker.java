@@ -25,6 +25,12 @@ public class Checker implements Serializable{
         type = color == Color.DKGRAY? 1 : -1;
     }
 
+    public Checker(Checker c){
+        init(c.getPosition());
+        color.setColor(c.getColor().getColor());
+        type = c.getType();
+    }
+
     private void init(PointF position){
         this.position = position;
         color.setStyle(Paint.Style.FILL);
@@ -86,5 +92,12 @@ public class Checker implements Serializable{
     public void draw(Canvas canvas) {
             canvas.drawCircle(position.x, position.y, size, color);
         canvas.drawCircle(position.x, position.y, size, borderColor);
+    }
+
+    public boolean clicked(PointF position) {
+        if(Math.sqrt(Math.pow(position.x - this.position.x, 2) + Math.pow(position.y - this.position.y, 2)) <= size)
+            return true;
+        return false;
+
     }
 }

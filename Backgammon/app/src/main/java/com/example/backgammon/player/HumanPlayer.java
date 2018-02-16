@@ -1,5 +1,7 @@
 package com.example.backgammon.player;
 
+import com.example.backgammon.gameLogic.GameLogic;
+
 /**
  * Created by Marija on 12.2.2018..
  */
@@ -10,7 +12,13 @@ public class HumanPlayer extends Player {
     }
 
     @Override
-    public void play() {
+    public void play(GameLogic gameLogic) {
+        gameLogic.setClickEnable();
+    }
+
+    @Override
+    public void rollDices(GameLogic gameLogic) {
+        gameLogic.setShakeEnable();
 
     }
 }
