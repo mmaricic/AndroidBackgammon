@@ -1,4 +1,4 @@
-package com.example.backgammon.player;
+package com.example.backgammon.players;
 
 
 import com.example.backgammon.gameLogic.CalculationState;

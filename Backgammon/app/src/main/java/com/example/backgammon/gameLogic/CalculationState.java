@@ -1,7 +1,5 @@
 package com.example.backgammon.gameLogic;
 
-import com.example.backgammon.models.GameData;
-
 /**
  * Created by Marija on 12.2.2018..
  */

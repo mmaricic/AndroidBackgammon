@@ -1,12 +1,14 @@
-package com.example.backgammon;
+package com.example.backgammon.GUIComponents;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 
-import com.example.backgammon.Border;
-import com.example.backgammon.Triangle;
+import com.example.backgammon.GUIComponents.Blot;
+import com.example.backgammon.GUIComponents.Border;
+import com.example.backgammon.GUIComponents.Checker;
+import com.example.backgammon.GUIComponents.Triangle;
 import com.example.backgammon.gameLogic.GameLogic;
 
 import java.util.ArrayList;
@@ -222,5 +224,10 @@ public class ImageData {
 
     public boolean droppedOnHomeBar(PointF position) {
         return rightBar.getPosition().contains(position.x, position.y);
+    }
+
+    public void addToBlot(int num, int color) {
+        for(int i = 0; i < num; i++)
+            blot.addChecker(color);
     }
 }

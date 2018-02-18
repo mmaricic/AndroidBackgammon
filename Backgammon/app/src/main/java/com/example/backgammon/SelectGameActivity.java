@@ -1,9 +1,11 @@
 package com.example.backgammon;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -18,6 +20,27 @@ public class SelectGameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_select_game);
         oldSelectedPlayer1 = R.id.human1;
         oldSelectedPlayer2 = R.id.human2;
+
+        ((EditText)findViewById(R.id.player1)).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus)
+                    hideKeyboard(v);
+            }
+        });
+
+        ((EditText)findViewById(R.id.player2)).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus)
+                    hideKeyboard(v);
+            }
+        });
+    }
+
+    private void hideKeyboard(View view) {
+        InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     public void player1TypeChanged(View v) {
@@ -58,6 +81,10 @@ public class SelectGameActivity extends AppCompatActivity {
         int compNum = -1;
         String player1 = ((EditText) findViewById(R.id.player1)).getText().toString();
         String player2 = ((EditText) findViewById(R.id.player2)).getText().toString();
+        if(player1.equals(player2)){
+            ((TextView) findViewById(R.id.error)).setText("Players names must be different!");
+            return;
+        }
         if (player1 == null || player1.isEmpty() || player2 == null || player2.isEmpty())
             ((TextView) findViewById(R.id.error)).setText("Players names are required!");
         else {
@@ -69,7 +96,14 @@ public class SelectGameActivity extends AppCompatActivity {
             intent.putExtra("COMP_NUM", compNum);
             intent.putExtra("PLAYER1", player1);
             intent.putExtra("PLAYER2", player2);
-            startActivity(intent);
+            intent.putExtra("savedGame", getIntent().getBooleanExtra("savedGame", false));
+            startActivityForResult(intent, 1);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        finish();
     }
 }

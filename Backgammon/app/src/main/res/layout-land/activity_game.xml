@@ -75,10 +75,10 @@
         android:fontFamily="serif"
         android:textAlignment="center"
         android:textColor="@android:color/white"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:textStyle="bold" />
 
-    <com.example.backgammon.BoardView
+    <com.example.backgammon.GUIComponents.BoardView
         android:id="@+id/board"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

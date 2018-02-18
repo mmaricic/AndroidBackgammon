@@ -1,7 +1,5 @@
 package com.example.backgammon.gameLogic;
 
-import com.example.backgammon.models.GameData;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -40,6 +38,14 @@ public class BearingOffStateCalculation implements CalculationState {
                     result.put(24 - dices[1], new ArrayList<Integer>());
                 result.get(24 - dices[1]).add(24);
             }
+
+            if(result.isEmpty()){
+                int i = 18;
+                while(i < 24 && board[i] <= 0)
+                    i++;
+                result.put(i, new ArrayList<Integer>());
+                result.get(i).add(24);
+            }
         } else { //white
             for (int i = 0; i < 6; i++)
                 if (board[i] < 0) {
@@ -62,6 +68,13 @@ public class BearingOffStateCalculation implements CalculationState {
                 if (result.get(dices[1] - 1) == null)
                     result.put(dices[1] - 1, new ArrayList<Integer>());
                 result.get(dices[1] - 1).add(24);
+            }
+            if(result.isEmpty()){
+                int i = 5;
+                while(i > -1 && board[i] >= 0)
+                    i--;
+                result.put(i, new ArrayList<Integer>());
+                result.get(i).add(24);
             }
         }
 

@@ -4,7 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/gameBackground"
-    tools:context="com.example.backgammon.SelectGameActivity">
+    tools:context="com.example.backgammon.SelectGameActivity"
+    android:clickable="true"
+    android:focusableInTouchMode="true"
+    android:focusable="true">
 
     <TextView
         android:id="@+id/error"
@@ -42,7 +45,8 @@
         android:inputType="text"
         android:maxLength="15"
         android:textSize="28sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:paddingStart="3dp"/>
 
     <RadioGroup
         android:id="@+id/radioPlayer1"
@@ -114,7 +118,8 @@
         android:inputType="text"
         android:maxLength="15"
         android:textSize="28sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:paddingStart="3dp"/>
 
     <RadioGroup
         android:id="@+id/radioPlayer2"

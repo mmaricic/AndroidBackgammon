@@ -5,11 +5,18 @@ import android.graphics.Color;
 import android.graphics.PointF;
 import android.widget.Toast;
 
-import com.example.backgammon.ImageData;
-import com.example.backgammon.models.GameData;
-import com.example.backgammon.player.Player;
+import com.example.backgammon.GUIComponents.ImageData;
+import com.example.backgammon.GameActivity;
+import com.example.backgammon.db.DbModel;
+import com.example.backgammon.players.Player;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 
 /**
@@ -17,10 +24,6 @@ import java.util.LinkedHashMap;
  */
 
 public class GameLogic {
-
-    public void setStartingRow(int startingRow) {
-        gameData.setStartingRow(startingRow);
-    }
 
     public interface GameInterface {
         void setShakeEnable(boolean shakeEnable);
@@ -34,38 +37,116 @@ public class GameLogic {
         void enableDices(boolean enable);
 
         void setDices(int diceOne, int diceTwo);
+
+        void finishGame(String player1, String player2, String winner);
+
+        void setPlayersData(String player1, String player2);
+
+        void setActivePlayer(int num);
     }
 
     private GameData gameData;
     private GameInterface gameInterface;
     private ImageData imageData;
+    private boolean continuedGame = false;
+    private DbModel dbModel;
 
     public GameLogic(int compNum, String player1, String player2, GameInterface gameInterface, ImageData imageData) {
         this.gameInterface = gameInterface;
         this.imageData = imageData;
         gameData = new GameData(compNum, player1, player2);
-        throwDices();
+        dbModel = new DbModel((Context) gameInterface);
+        ((GameActivity) gameInterface).deleteFile("savedGame.txt");
+    }
+
+    public GameLogic(GameInterface gameInterface, ImageData imageData) {
+        continuedGame = true;
+        this.gameInterface = gameInterface;
+        this.imageData = imageData;
+        dbModel = new DbModel((Context) gameInterface);
+
+        gameData = new GameData();
+        try (FileInputStream fis = ((GameActivity) gameInterface).openFileInput("savedGame.txt");
+             InputStreamReader isr = new InputStreamReader(fis);
+             BufferedReader bufferedReader = new BufferedReader(isr)) {
+            gameData.loadGame(bufferedReader);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+        this.gameInterface.setPlayersData(gameData.getPlayers()[0].getName(), gameData.getPlayers()[1].getName());
+        this.gameInterface.setActivePlayer(gameData.getCurrentPlayer());
+        this.gameInterface.changeActivePlayer();
+        ((GameActivity) gameInterface).deleteFile("savedGame.txt");
+
+    }
+
+    public void startGame(){
+        if(continuedGame)
+            continuePlaying();
+        else
+            throwDices();
     }
 
     private void setTable() {
         int[] table = gameData.getTable();
-        table[0] = 2;
-        table[5] = -5;
-        table[7] = -3;
-        table[11] = 5;
-        table[12] = -5;
-        table[16] = 3;
-        table[18] = 5;
-        table[23] = -2;
+        if (continuedGame) {
+            for (int i = 0; i < 24; i++) {
+                if (table[i] != 0)
+                    imageData.setCheckers(i, Math.abs(table[i]), table[i] > 0 ? Color.DKGRAY : Color.WHITE);
+            }
+            int[] blot = gameData.getBlots();
+            if (blot[0] > 0)
+                imageData.addToBlot(blot[0], Color.WHITE);
+            if (blot[1] > 0)
+                imageData.addToBlot(blot[1], Color.DKGRAY);
+        } else {
 
-        imageData.setCheckers(0, 2, Color.DKGRAY);
-        imageData.setCheckers(5, 5, Color.WHITE);
-        imageData.setCheckers(7, 3, Color.WHITE);
-        imageData.setCheckers(11, 5, Color.DKGRAY);
-        imageData.setCheckers(12, 5, Color.WHITE);
-        imageData.setCheckers(16, 3, Color.DKGRAY);
-        imageData.setCheckers(18, 5, Color.DKGRAY);
-        imageData.setCheckers(23, 2, Color.WHITE);
+            table[0] = 2;
+            table[5] = -5;
+            table[7] = -3;
+            table[11] = 5;
+            table[12] = -5;
+            table[16] = 3;
+            table[18] = 5;
+            table[23] = -2;
+
+            imageData.setCheckers(0, 2, Color.DKGRAY);
+            imageData.setCheckers(5, 5, Color.WHITE);
+            imageData.setCheckers(7, 3, Color.WHITE);
+            imageData.setCheckers(11, 5, Color.DKGRAY);
+            imageData.setCheckers(12, 5, Color.WHITE);
+            imageData.setCheckers(16, 3, Color.DKGRAY);
+            imageData.setCheckers(18, 5, Color.DKGRAY);
+            imageData.setCheckers(23, 2, Color.WHITE);
+        }
+    }
+
+    private void continuePlaying() {
+        gameInterface.enableDices(false);
+        gameInterface.setDices(gameData.getDices()[0], gameData.getDices()[1]);
+        switch (gameData.gameState) {
+            case GameData.CalculateMoves:
+            case GameData.CalculateMovesSecond:
+                calculateMoves();
+                break;
+            case GameData.endOfFirstMove:
+            case GameData.endOfSecondMove:
+                endOfMove();
+                break;
+            case GameData.outOfMoves:
+                outOfMoves();
+                break;
+            case GameData.playingFirstTime:
+            case GameData.playingSecongTime:
+                play();
+                break;
+            case GameData.SelectPlayer:
+            case GameData.ThrowDices:
+                gameInterface.enableDices(true);
+                throwDices();
+                break;
+        }
     }
 
     public void sizeSet() {
@@ -98,11 +179,13 @@ public class GameLogic {
     private void throwDices() {
         /*trazi od igraca da baci kocke
         * (za sad radi random)*/
-        gameInterface.refresh("Please throw the dices", true);
+        gameInterface.refresh("Shake mobile to throw the dices", true);
+        gameInterface.setShakeEnable(true);
         gameData.getPlayers()[gameData.getCurrentPlayer()].rollDices(this);
     }
 
     public void dicesThrown() {
+        gameInterface.setShakeEnable(false);
         if (gameData.gameState == GameData.SelectPlayer)
             determineOrder((int) (Math.random() * 5) + 1);
         else {
@@ -112,6 +195,8 @@ public class GameLogic {
             int diceOne = (int) (Math.random() * 5) + 1;
             int diceTwo = (int) (Math.random() * 5) + 1;
             gameInterface.setDices(diceOne, diceTwo);
+            if(diceOne == diceTwo)
+                gameData.setDoubleDices(diceOne);
             gameData.setDices(diceOne, diceTwo);
             gameInterface.enableDices(false);
             gameData.gameState = GameData.CalculateMoves;
@@ -130,11 +215,6 @@ public class GameLogic {
             gameData.gameState = GameData.outOfMoves;
             outOfMoves();
         } else {
-            if (gameData.getPossibleMoves().size() == 1 && gameData.getPossibleMoves().get(-1) != null)
-                imageData.highlightFromBlot(-1, gameData.getPlayers()[gameData.getCurrentPlayer()].getCheckers());
-            else
-                imageData.highlightCheckers(gameData.getPossibleMoves().keySet());
-            gameInterface.refresh("Make your move. You can move highlighted checkers.", true);
             if (gameData.gameState == GameData.CalculateMoves)
                 gameData.gameState = GameData.playingFirstTime;
             else
@@ -145,53 +225,98 @@ public class GameLogic {
 
     private void play() {
         /*kazi igracu da igra*/
+        if (gameData.getPossibleMoves().size() == 1 && gameData.getPossibleMoves().get(-1) != null)
+            imageData.highlightFromBlot(-1, gameData.getPlayers()[gameData.getCurrentPlayer()].getCheckers());
+        else
+            imageData.highlightCheckers(gameData.getPossibleMoves().keySet());
+        gameInterface.refresh("Make your move. You can move highlighted checkers.", true);
         gameData.getPlayers()[gameData.getCurrentPlayer()].play(this);
     }
 
-    public void endOfMove(int newPos) {
+    public void endOfMove() {
         /*igrac zavrsio potez. proveri ako je prvi potez,
         * da li ima jos poteza. Ako je drugi potez, da li opet
         * baca kocke. Ako nista, predji na sledeceg i opet sve
         * */
         gameInterface.setClickEnable(false);
+        int newPos = gameData.getNewRow();
         int old = gameData.getStartingRow();
         gameData.setStartingRow(-2);
         if (newPos < -1) {
-            imageData.highlightCheckers(gameData.getPossibleMoves().keySet());
+            if (old == -1)
+                imageData.highlightFromBlot(-1, gameData.getPlayers()[gameData.getCurrentPlayer()].getCheckers());
+            else
+                imageData.highlightCheckers(gameData.getPossibleMoves().keySet());
             gameInterface.refresh("Make your move. You can move highlighted checkers.", true);
+            gameData.gameState = gameData.gameState == GameData.endOfFirstMove ? GameData.playingFirstTime : GameData.playingSecongTime;
             play();
         } else {
+            Player currPlayer = gameData.getPlayers()[gameData.getCurrentPlayer()];
+            if (currPlayer.getState() == CalculationState.BearingOffState
+                    && gameData.countInHomeBoard(currPlayer.getCheckers()) == 0) {
+                gameData.gameState = GameData.finished;
+                finishGame();
+                return;
+            }
             if (gameData.gameState == GameData.endOfSecondMove) {
-                gameData.gameState = GameData.ThrowDices;
-                gameData.changeCurrentPlayer();
-                throwDices();
+               switchPlayers();
                 return;
             }
             int move = Math.abs(newPos - old);
             if (old == -1 && gameData.getCurrentPlayer() == 0)
                 move = 24 - newPos;
+            if (newPos == 24 && gameData.getCurrentPlayer() == 0)
+                move = old + 1;
             int[] dices = gameData.getDices();
             boolean oneMove;
             if (oneMove = dices[0] == move)
                 dices[0] = -1;
             else if (oneMove = dices[1] == move)
                 dices[1] = -1;
-            else
+            else if (dices[0] + dices[1] == move)
                 dices[0] = dices[1] = -1;
-
+            if (dices[0] > 0 && dices[1] > 0 && currPlayer.getState() == CalculationState.BearingOffState && newPos == 24) {
+                oneMove = true;
+                dices[0] = -1;
+            }
             if (oneMove && (dices[0] > -1 || dices[1] > -1)) {
                 gameData.gameState = GameData.CalculateMovesSecond;
                 calculateMoves();
-            } else {
-                gameData.gameState = GameData.ThrowDices;
-                gameData.changeCurrentPlayer();
-                throwDices();
-            }
+            } else
+               switchPlayers();
+
 
         }
     }
 
+    private void switchPlayers() {
+        if(gameData.areDoubleDices()){
+            gameData.gameState = GameData.CalculateMoves;
+            gameData.setDoubleDicesForPlaying();
+            calculateMoves();
+
+        }else {
+            gameData.gameState = GameData.ThrowDices;
+            gameData.changeCurrentPlayer();
+            gameInterface.changeActivePlayer();
+            throwDices();
+        }
+    }
+
     private void finishGame() {
+       /* EndGameDialog dialog = new EndGameDialog();
+        Bundle arg = new Bundle();
+        arg.putString("winner", gameData.getPlayers()[gameData.getCurrentPlayer()].getName());
+        dialog.setArguments(arg);
+        dialog.show(((Activity) gameInterface).getFragmentManager(), "endGame");*/
+        ((GameActivity) gameInterface).deleteFile("savedGame.txt");
+        ArrayList<String> names = new ArrayList<>();
+        names.add(gameData.getPlayers()[0].getName());
+        names.add(gameData.getPlayers()[1].getName());
+        Collections.sort(names);
+        dbModel.saveData(names.get(0), names.get(1), gameData.getPlayers()[gameData.getCurrentPlayer()].getName());
+        gameInterface.finishGame(names.get(0), names.get(1), gameData.getPlayers()[gameData.getCurrentPlayer()].getName());
+
     }
 
     private void outOfMoves() {
@@ -235,17 +360,21 @@ public class GameLogic {
                 moveChecker(gameData.getStartingRow(), r);
                 imageData.putSelectedCheckerOnBoard(r);
 
-            } else if(currPlayer.getState() == CalculationState.BearingOffState && imageData.droppedOnHomeBar(position)){
+            } else if (currPlayer.getState() == CalculationState.BearingOffState && imageData.droppedOnHomeBar(position)) {
                 imageData.removeSelectedChecker();
-                r = currPlayer.getCheckers() == 1? 24: -1;
-
-            }
-            else{
+                r = currPlayer.getCheckers() == 1 ? 24 : -1;
+                moveChecker(gameData.getStartingRow(), r);
+            } else {
                 imageData.putSelectedCheckerOnBoard(gameData.getStartingRow());
-                imageData.highlightCheckers(gameData.getPossibleMoves().keySet());
+                //imageData.highlightCheckers(gameData.getPossibleMoves().keySet());
             }
             imageData.resetColorTriangles(gameData.getPossibleMoves().get(gameData.getStartingRow()));
-            endOfMove(r);
+            if (gameData.gameState == GameData.playingFirstTime)
+                gameData.gameState = GameData.endOfFirstMove;
+            else
+                gameData.gameState = GameData.endOfSecondMove;
+            gameData.setNewRow(r);
+            endOfMove();
 
         }
     }
@@ -262,11 +391,16 @@ public class GameLogic {
             table[newPosition] += currentPlayer.getCheckers();
         if (oldPosition > -1) {
             table[oldPosition] -= currentPlayer.getCheckers();
-            if (gameData.countOutsideHomeBoard(currentPlayer.getCheckers()) == 0)
+            int num = gameData.countOutsideHomeBoard(currentPlayer.getCheckers());
+            if (num == 0)
                 currentPlayer.setState(CalculationState.BearingOffState);
-        } else if (!imageData.hasMoreOnBlot(currentPlayer.getCheckers()))
-            currentPlayer.setState(CalculationState.RegularState);
-        if (table[newPosition] == 0) {
+        } else {
+            gameData.getBlots()[gameData.getCurrentPlayer()]--;
+            if (!imageData.hasMoreOnBlot(currentPlayer.getCheckers()))
+                currentPlayer.setState(CalculationState.RegularState);
+        }
+        if (newPosition < 24 && newPosition > -1 && table[newPosition] == 0) {
+            gameData.getBlots()[((gameData.getCurrentPlayer() + 1) % 2)]++;
             table[newPosition] = currentPlayer.getCheckers();
             imageData.moveToBlot(newPosition);
             gameData.getPlayers()[(gameData.getCurrentPlayer() + 1) % 2].setState(CalculationState.BlotState);
@@ -283,10 +417,29 @@ public class GameLogic {
         moveChecker(oldPosition, newPosition);
         if (newPosition < 24 && newPosition > -1)
             imageData.setCheckers(newPosition, 1, checkerColor);
-
+        if (gameData.gameState == GameData.playingFirstTime)
+            gameData.gameState = GameData.endOfFirstMove;
+        else
+            gameData.gameState = GameData.endOfSecondMove;
     }
 
-    public void continueGame(GameData gameData) {
-        ///nastavi igru
+
+    public void setStartingRow(int startingRow) {
+        gameData.setStartingRow(startingRow);
+    }
+
+    public void setNewRow(Integer newRow) {
+        gameData.setNewRow(newRow);
+    }
+
+    public void saveGame() {
+        if (gameData.gameState != GameData.finished) {
+            try (FileOutputStream fos = ((GameActivity) gameInterface).openFileOutput("savedGame.txt", Context.MODE_PRIVATE)) {
+                gameData.saveGame(fos);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.example.backgammon;
+package com.example.backgammon.GUIComponents;
 
 import android.graphics.Canvas;
 import android.graphics.Color;

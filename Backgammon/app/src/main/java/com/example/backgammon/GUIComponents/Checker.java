@@ -1,4 +1,4 @@
-package com.example.backgammon;
+package com.example.backgammon.GUIComponents;
 
 
 import android.graphics.Canvas;
@@ -18,6 +18,7 @@ public class Checker implements Serializable{
     private static float size;
     private Paint borderColor = new Paint();
     private int type = 0;
+    private static final float DELTA = 5;
 
     public Checker(int color, PointF position){
         init(position);
@@ -95,7 +96,7 @@ public class Checker implements Serializable{
     }
 
     public boolean clicked(PointF position) {
-        if(Math.sqrt(Math.pow(position.x - this.position.x, 2) + Math.pow(position.y - this.position.y, 2)) <= size)
+        if(Math.sqrt(Math.pow(position.x - this.position.x, 2) + Math.pow(position.y - this.position.y, 2)) <= size+DELTA)
             return true;
         return false;
 

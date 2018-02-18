@@ -33,7 +33,8 @@
         android:fontFamily="serif"
         android:text="@string/continue_game"
         android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:onClick="continueGame"/>
 
     <ImageView
         android:id="@+id/logo"
@@ -53,7 +54,8 @@
         android:fontFamily="serif"
         android:text="@string/statistic"
         android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:onClick="openStatistic"/>
 
     <Button
         android:id="@+id/settings"

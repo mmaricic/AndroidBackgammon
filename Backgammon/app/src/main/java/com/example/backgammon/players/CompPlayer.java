@@ -1,10 +1,9 @@
-package com.example.backgammon.player;
+package com.example.backgammon.players;
 
 import android.os.AsyncTask;
 
 import com.example.backgammon.gameLogic.GameLogic;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -67,7 +66,8 @@ public class CompPlayer extends Player {
 
         @Override
         protected void onPostExecute(Integer newPosition) {
-            gameLogic.endOfMove(newPosition);
+            gameLogic.setNewRow(newPosition);
+            gameLogic.endOfMove();
         }
     }
 }

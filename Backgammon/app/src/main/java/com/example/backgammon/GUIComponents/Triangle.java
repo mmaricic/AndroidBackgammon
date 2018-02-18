@@ -1,10 +1,10 @@
-package com.example.backgammon;
+package com.example.backgammon.GUIComponents;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.RectF;
 
 import java.util.ArrayList;
 
@@ -92,7 +92,9 @@ public class Triangle {
         double A2 = area(a, position, c);
         double A3 = area(a, b, position);
         double sum = A1 + A2 + A3;
-        return (A + Math.pow(Checker.getSize(), 2) >= sum);
+        return (A + Math.pow(Checker.getSize(), 2)*3 >= sum);
+
+        //return (new RectF(a.x < b.x? a.x: b.x, a.y < c.y? a.y: c.y,a.x > b.x? a.x: b.x, a.y > c.y? a.y: c.y).contains(position.x, position.y));
     }
 
     private static double area(PointF p1, PointF p2, PointF p3) {

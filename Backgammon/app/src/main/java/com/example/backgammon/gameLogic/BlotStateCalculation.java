@@ -1,7 +1,5 @@
 package com.example.backgammon.gameLogic;
 
-import com.example.backgammon.models.GameData;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
