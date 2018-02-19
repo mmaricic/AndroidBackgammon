@@ -25,6 +25,10 @@ import java.util.LinkedHashMap;
 
 public class GameLogic {
 
+    public Context getContext() {
+        return ((GameActivity)gameInterface);
+    }
+
     public interface GameInterface {
         void setShakeEnable(boolean shakeEnable);
 
@@ -34,9 +38,7 @@ public class GameLogic {
 
         void changeActivePlayer();
 
-        void enableDices(boolean enable);
-
-        void setDices(int diceOne, int diceTwo);
+        void setDices(ArrayList<Integer> one, ArrayList<Integer> two);
 
         void finishGame(String player1, String player2, String winner);
 
@@ -50,6 +52,7 @@ public class GameLogic {
     private ImageData imageData;
     private boolean continuedGame = false;
     private DbModel dbModel;
+    private ArrayList<Integer> [] diceNumber = new ArrayList[6];
 
     public GameLogic(int compNum, String player1, String player2, GameInterface gameInterface, ImageData imageData) {
         this.gameInterface = gameInterface;
@@ -57,6 +60,7 @@ public class GameLogic {
         gameData = new GameData(compNum, player1, player2);
         dbModel = new DbModel((Context) gameInterface);
         ((GameActivity) gameInterface).deleteFile("savedGame.txt");
+        initDiceNumbers();
     }
 
     public GameLogic(GameInterface gameInterface, ImageData imageData) {
@@ -78,6 +82,34 @@ public class GameLogic {
         this.gameInterface.setActivePlayer(gameData.getCurrentPlayer());
         this.gameInterface.changeActivePlayer();
         ((GameActivity) gameInterface).deleteFile("savedGame.txt");
+        initDiceNumbers();
+    }
+
+    private void initDiceNumbers() {
+        ArrayList<Integer> temp = new ArrayList<>();
+        temp.add(4);
+        diceNumber[0] = temp;
+
+        temp = new ArrayList<>();
+        temp.add(2); temp.add(6);
+        diceNumber[1] = temp;
+
+        temp = new ArrayList<>();
+        temp.add(4); temp.add(2); temp.add(6);
+        diceNumber[2] = temp;
+
+        temp = new ArrayList<>();
+        temp.add(0); temp.add(2); temp.add(6); temp.add(8);
+        diceNumber[3] = temp;
+
+        temp = new ArrayList<>();
+        temp.add(0); temp.add(4); temp.add(2); temp.add(6); temp.add(8);
+        diceNumber[4] = temp;
+
+        temp = new ArrayList<>();
+        temp.add(0); temp.add(5); temp.add(2); temp.add(6); temp.add(8);temp.add(3);
+        diceNumber[5] = temp;
+
 
     }
 
@@ -120,11 +152,13 @@ public class GameLogic {
             imageData.setCheckers(18, 5, Color.DKGRAY);
             imageData.setCheckers(23, 2, Color.WHITE);
         }
+        startGame();
     }
 
     private void continuePlaying() {
-        gameInterface.enableDices(false);
-        gameInterface.setDices(gameData.getDices()[0], gameData.getDices()[1]);
+        gameInterface.setShakeEnable(false);
+        int[] dices = gameData.getDices();
+        gameInterface.setDices(dices[0] > 0? diceNumber[dices[0]-1]: null, dices[1]>0?diceNumber[dices[1]-1]: null);
         switch (gameData.gameState) {
             case GameData.CalculateMoves:
             case GameData.CalculateMovesSecond:
@@ -143,7 +177,7 @@ public class GameLogic {
                 break;
             case GameData.SelectPlayer:
             case GameData.ThrowDices:
-                gameInterface.enableDices(true);
+                gameInterface.setShakeEnable(true);
                 throwDices();
                 break;
         }
@@ -160,11 +194,13 @@ public class GameLogic {
         * i pozovi throwDices*/
         if (gameData.getDices()[0] == 0) {
             gameData.setDiceOne(diceValue);
+            gameInterface.setDices(diceNumber[diceValue-1], null);
             gameInterface.changeActivePlayer();
             gameData.changeCurrentPlayer();
             throwDices();
         } else {
             gameData.setDiceTwo(diceValue);
+            gameInterface.setDices(null, diceNumber[diceValue-1]);
             int[] dices = gameData.getDices();
             if (dices[0] > dices[1]) {
                 gameData.setCurrentPlayer(0);
@@ -179,8 +215,10 @@ public class GameLogic {
     private void throwDices() {
         /*trazi od igraca da baci kocke
         * (za sad radi random)*/
-        gameInterface.refresh("Shake mobile to throw the dices", true);
-        gameInterface.setShakeEnable(true);
+        if(gameData.gameState == GameData.SelectPlayer)
+            gameInterface.refresh("Shake the device to determine playing order", false);
+        else
+            gameInterface.refresh("Shake the device to throw the dices", true);
         gameData.getPlayers()[gameData.getCurrentPlayer()].rollDices(this);
     }
 
@@ -194,11 +232,10 @@ public class GameLogic {
             * prelazi na calculateMoves*/
             int diceOne = (int) (Math.random() * 5) + 1;
             int diceTwo = (int) (Math.random() * 5) + 1;
-            gameInterface.setDices(diceOne, diceTwo);
+            gameInterface.setDices(diceNumber[diceOne-1], diceNumber[diceTwo-1]);
             if(diceOne == diceTwo)
                 gameData.setDoubleDices(diceOne);
             gameData.setDices(diceOne, diceTwo);
-            gameInterface.enableDices(false);
             gameData.gameState = GameData.CalculateMoves;
             calculateMoves();
         }
@@ -332,7 +369,6 @@ public class GameLogic {
 
     public void setShakeEnable() {
         gameInterface.setShakeEnable(true);
-        gameInterface.enableDices(true);
     }
 
     public void fingerDown(PointF position) {

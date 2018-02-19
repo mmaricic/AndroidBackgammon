@@ -31,7 +31,7 @@ public class StatisticActivity extends AppCompatActivity implements AdapterView.
 
     public void deleteData(View view) {
         controller.deleteAll();
-        ListView lv = ((ListView) findViewById(R.id.list));
+        ListView lv = ((ListView) findViewById(R.id.list_stat));
         ((SimpleCursorAdapter)lv.getAdapter()).changeCursor(null);
     }
 

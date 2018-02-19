@@ -11,4 +11,8 @@
     <string name="player2nick">Player 2 name:</string>
     <string name="throwDices">ROLL</string>
     <string name="stat">STATISTIC</string>
+    <string name="detectShake">Detect shake threshold:</string>
+    <string name="minShake">Minimal shake threshold:</string>
+    <string name="prefSave">SAVE CHANGES</string>
+    <string name="prefReset">RESET</string>
 </resources>

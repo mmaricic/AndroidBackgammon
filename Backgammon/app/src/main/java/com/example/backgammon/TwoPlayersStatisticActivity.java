@@ -63,7 +63,6 @@ public class TwoPlayersStatisticActivity extends AppCompatActivity {
         ListView lv = ((ListView) findViewById(R.id.list));
         ((SimpleCursorAdapter)lv.getAdapter()).changeCursor(null);
 
-        ((TextView)findViewById(R.id.player1_all)).setText(player1 + ": "+0);
-        ((TextView)findViewById(R.id.player2_all)).setText(0 + ": "+player2);
+        finish();
     }
 }

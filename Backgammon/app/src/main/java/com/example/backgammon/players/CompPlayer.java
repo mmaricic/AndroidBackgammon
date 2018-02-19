@@ -1,7 +1,9 @@
 package com.example.backgammon.players;
 
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 
+import com.example.backgammon.R;
 import com.example.backgammon.gameLogic.GameLogic;
 
 import java.util.ArrayList;
@@ -23,8 +25,31 @@ public class CompPlayer extends Player {
     }
 
     @Override
-    public void rollDices(GameLogic gameLogic) {
-        gameLogic.dicesThrown();
+    public void rollDices(final GameLogic gameLogic) {
+
+        new AsyncTask<Void, Void, Void>(){
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    MediaPlayer  mediaPlayer = MediaPlayer.create(gameLogic.getContext(), R.raw.dices);
+                    mediaPlayer.setLooping(true);
+                    mediaPlayer.start();
+                    Thread.sleep(1000);
+                    mediaPlayer.stop();
+                    mediaPlayer.reset();
+                    mediaPlayer.release();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                gameLogic.dicesThrown();
+            }
+        }.execute();
     }
 
     private class Movement extends AsyncTask< Void, int[], Integer>{

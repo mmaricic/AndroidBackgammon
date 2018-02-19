@@ -13,21 +13,22 @@ import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.FloatMath;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.MediaController;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.backgammon.GUIComponents.BoardView;
 import com.example.backgammon.GUIComponents.Checker;
+import com.example.backgammon.GUIComponents.DiceView;
 import com.example.backgammon.GUIComponents.ImageData;
 import com.example.backgammon.gameLogic.GameLogic;
+
+import java.util.ArrayList;
+
+import static com.example.backgammon.UtilParameter.*;
+
 
 
 public class GameActivity extends AppCompatActivity implements GameLogic.GameInterface, View.OnTouchListener,
@@ -35,22 +36,22 @@ public class GameActivity extends AppCompatActivity implements GameLogic.GameInt
     private GameLogic gameLogic;
     private boolean shakeEnabled = false;
     private boolean clickEnabled = false;
+
     private TextView messageBox;
     private TextView[] players = new TextView[2];
     private int player = 1;
     private BoardView table;
+
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private boolean oldValShake;
     private boolean oldValClick;
-    private static final float SHAKE_THRESHOLD = 1.3f;
-    private static final int SHAKE_SLOP_TIME_MS = 150;
-    private long mShakeTimestamp;
-    private boolean shaking;
     private boolean paused = false;
+
+    private boolean shaking;
     private float accelLastGravity = 0.0f;
     private float accelCurrentGravity = 0.0f;
-    private float accel = 0;
+    private float accel = 0f;
     private float alpha = 0.8f;
     private MediaPlayer mediaPlayer;
 
@@ -87,7 +88,6 @@ public class GameActivity extends AppCompatActivity implements GameLogic.GameInt
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        gameLogic.startGame();
     }
 
     @Override
@@ -150,14 +150,17 @@ public class GameActivity extends AppCompatActivity implements GameLogic.GameInt
         players[player].setTextColor(Color.parseColor("#a18d78"));
     }
 
-    @Override
-    public void enableDices(boolean enable) {
-        ((Button) findViewById(R.id.roll)).setEnabled(enable);
-    }
 
     @Override
-    public void setDices(int diceOne, int diceTwo) {
-        ((Button) findViewById(R.id.roll)).setText(diceOne + " " + diceTwo);
+    public void setDices(ArrayList<Integer> one, ArrayList<Integer> two) {
+        if(one != null) {
+            ((DiceView) findViewById(R.id.diceOne)).setNumber(one);
+            ((DiceView) findViewById(R.id.diceOne)).invalidate();
+        }
+        if(two != null) {
+            ((DiceView) findViewById(R.id.diceTwo)).setNumber(two);
+            ((DiceView) findViewById(R.id.diceTwo)).invalidate();
+        }
     }
 
     @Override
@@ -233,51 +236,39 @@ public class GameActivity extends AppCompatActivity implements GameLogic.GameInt
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (shakeEnabled) {
-            final long now = System.currentTimeMillis();
-
             float x = event.values[0];
             float y = event.values[1];
             float z = event.values[2];
-            if(mShakeTimestamp == 0){
-                mShakeTimestamp = now;
-                return;
-            }
-            // gForce will be close to 1 when there is no movement.
+
+            float SHAKE_THRESHOLD = getSharedPreferences(PREF_FILE_NAME, MODE_PRIVATE).getFloat(DETECT_SHAKE, UtilParameter.SHAKE_THRESHOLD);
+            float MIN_SHAKE_THRESHOLD = getSharedPreferences(PREF_FILE_NAME, MODE_PRIVATE).getFloat(MIN_SHAKE, UtilParameter.MIN_SHAKE_THRESHOLD);
             accelLastGravity = accelCurrentGravity;
             accelCurrentGravity = (float) Math.sqrt((double) (x*x + y*y + z*z));
-            float delta = accelCurrentGravity - accelLastGravity;
+            float delta = (float)Math.abs(accelCurrentGravity - accelLastGravity);
+
             accel =  accel * alpha + (1-alpha)*delta;
-            if(accel > 1.3)
-                Log.d("backgammon",""+accel);
-            if (accel > SHAKE_THRESHOLD) {
-                // ignore shake events too close to each other (500ms)
-                if (mShakeTimestamp + SHAKE_SLOP_TIME_MS > now) {
-                    return;
-                }
-
-                if(!shaking)
-                    shakeStarted();
+            if (accel > SHAKE_THRESHOLD && !shaking) {
+                shakeStarted();
             }
-            else if(shaking)
-                shakeStopped();
-
-            mShakeTimestamp = now;
-        }
+            else if(accel < 3f && shaking)
+                    shakeStopped();
+            }
 
     }
 
     private void shakeStopped() {
-        Log.d("backgammon", "gotov");
         shaking = false;
         gameLogic.dicesThrown();
-        mShakeTimestamp = 0;
         mediaPlayer.stop();
+        mediaPlayer.reset();
+        mediaPlayer.release();
     }
 
     private void shakeStarted() {
         shaking = true;
+        mediaPlayer = MediaPlayer.create(this, R.raw.dices);
+        mediaPlayer.setLooping(true);
         mediaPlayer.start();
-
     }
 
     @Override

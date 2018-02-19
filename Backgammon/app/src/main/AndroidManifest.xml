@@ -27,7 +27,8 @@
         <activity
             android:name=".TwoPlayersStatisticActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".StatisticActivity"></activity>
+        <activity android:name=".StatisticActivity" />
+        <activity android:name=".ParametersActivity"></activity>
     </application>
 
 </manifest>

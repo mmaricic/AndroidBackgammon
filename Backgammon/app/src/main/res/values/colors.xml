@@ -7,4 +7,5 @@
     <color name="gameBackground">#AE9D8B</color>
     <color name="edgeColor">#602D10</color>
     <color name="itemColor">#e0d9d2</color>
+    <color name="editText">#CFBFAD</color>
 </resources>

@@ -40,7 +40,7 @@
         android:layout_above="@+id/radioPlayer1"
         android:layout_centerInParent="true"
         android:layout_marginBottom="20dp"
-        android:background="#CFBFAD"
+        android:background="@color/editText"
         android:fontFamily="serif"
         android:inputType="text"
         android:maxLength="15"
@@ -111,13 +111,13 @@
         android:layout_below="@+id/textViewp2"
         android:layout_centerInParent="true"
         android:layout_marginTop="10dp"
-        android:background="#CFBFAD"
+        android:background="@color/editText"
         android:fontFamily="serif"
         android:inputType="text"
         android:maxLength="15"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:paddingStart="15dp"/>
+        android:paddingStart="5dp"/>
 
     <RadioGroup
         android:id="@+id/radioPlayer2"
