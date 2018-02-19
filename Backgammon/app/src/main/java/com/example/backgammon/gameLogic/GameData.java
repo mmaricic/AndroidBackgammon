@@ -195,8 +195,12 @@ public class GameData implements Serializable {
         sb.append(startingRow).append("%%");
         sb.append(newRow).append("%%");
         sb.append(blots[0]).append("%%");
-        sb.append(blots[1]).append("\n");
-
+        sb.append(blots[1]);
+        if(doubleDices != null){
+            sb.append("%%").append(doubleDices[0]);
+            sb.append("%%").append(doubleDices[1]);
+        }
+        sb.append("\n");
         fos.write(sb.toString().getBytes());
 
         sb = new StringBuilder();
@@ -247,7 +251,11 @@ public class GameData implements Serializable {
 
         blots[0] = Integer.parseInt(intString[8]);
         blots[1] = Integer.parseInt(intString[9]);
-
+        if(intString.length > 10){
+            doubleDices = new int[2];
+            doubleDices[0] = Integer.parseInt(intString[10]);
+            doubleDices[1] = Integer.parseInt(intString[11]);
+        }
         String line;
         possibleMoves = new LinkedHashMap<>();
         while ((line = bufferedReader.readLine()) != null) {
