@@ -204,9 +204,11 @@ public class GameLogic {
             int[] dices = gameData.getDices();
             if (dices[0] > dices[1]) {
                 gameData.setCurrentPlayer(0);
-                gameInterface.changeActivePlayer();
+
             } else
                 gameData.setCurrentPlayer(1);
+            gameInterface.setActivePlayer(gameData.getCurrentPlayer());
+            gameInterface.changeActivePlayer();
             gameData.gameState = GameData.ThrowDices;
             throwDices();
         }

@@ -18,7 +18,7 @@ public class Checker implements Serializable{
     private static float size;
     private Paint borderColor = new Paint();
     private int type = 0;
-    private static final float DELTA = 5;
+    private static final float DELTA = 10;
 
     public Checker(int color, PointF position){
         init(position);
