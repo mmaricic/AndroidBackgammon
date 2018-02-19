@@ -7,6 +7,7 @@
     tools:context="com.example.backgammon.TwoPlayersStatisticActivity">
 
     <TextView
+        android:layout_marginTop="5dp"
         android:id="@+id/gameinfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,6 +21,8 @@
         android:layout_marginBottom="10dp"/>
 
     <Button
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="5dp"
         android:id="@+id/removedata"
         android:layout_width="100dp"
         android:layout_height="50dp"
