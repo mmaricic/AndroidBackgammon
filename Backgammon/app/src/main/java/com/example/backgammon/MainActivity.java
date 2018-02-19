@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
             editor.apply();
         }
 
-       // setStatistic();
+       setStatistic();
     }
 
     private void setStatistic() {
